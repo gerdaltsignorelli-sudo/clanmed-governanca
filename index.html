@@ -257,22 +257,23 @@ let state = {
   mesSel: "Maio",
   categorias: {
     "Custos Cirúrgicos": ["Materiais Cirúrgicos","Monitorização","Locação de Equipamentos","Apoio Administrativo"],
-    "Custos Operacionais Fixos": ["Locação da Sede","Farmacêutica","Funcionário Administrativo","Energia Elétrica","Internet","Condomínio","Combustível"],
-    "Tributos & Licenças": ["Simples Nacional (10%)","Anvisa + Visa Municipal"]
+    "Custos Operacionais Fixos": ["Locação da Sede","Farmacêutica","Funcionário Administrativo","Energia Elétrica","Internet","Condomínio","Combustível","Gerente Comercial"],
+    "Tributos & Licenças": ["Simples Nacional (15% auto)","Anvisa + Visa Municipal"]
   },
   custos: {
     "Materiais Cirúrgicos": {Fevereiro:4009.56,Março:8340.66,Abril:10073.76,Maio:18617.25},
     "Monitorização": {Fevereiro:400,Março:1200,Abril:1200,Maio:2400},
     "Locação de Equipamentos": {Fevereiro:8000,Março:8000,Abril:8000,Maio:8000},
     "Apoio Administrativo": {Fevereiro:2000,Março:2000,Abril:2000,Maio:2000},
-    "Locação da Sede": {Fevereiro:2500,Março:2500,Abril:2500,Maio:2500},
-    "Farmacêutica": {Fevereiro:4000,Março:4000,Abril:4000,Maio:4000},
-    "Funcionário Administrativo": {Fevereiro:3000,Março:3000,Abril:3000,Maio:3000},
-    "Energia Elétrica": {Fevereiro:150,Março:150,Abril:150,Maio:150},
-    "Internet": {Fevereiro:100,Março:100,Abril:100,Maio:100},
-    "Condomínio": {Fevereiro:500,Março:500,Abril:500,Maio:500},
-    "Combustível": {Fevereiro:2000,Março:2000,Abril:2000,Maio:2000},
-    "Simples Nacional (10%)": {Fevereiro:3640,Março:6060,Abril:9410,Maio:12910},
+    "Locação da Sede": {Fevereiro:2800,Março:2800,Abril:2800,Maio:2800,Junho:2800,Julho:2800,Agosto:2800,Setembro:2800,Outubro:2800,Novembro:2800,Dezembro:2800},
+    "Farmacêutica": {Fevereiro:5500,Março:5500,Abril:5500,Maio:5500,Junho:5500,Julho:5500,Agosto:5500,Setembro:5500,Outubro:5500,Novembro:5500,Dezembro:5500},
+    "Funcionário Administrativo": {Fevereiro:4500,Março:4500,Abril:4500,Maio:4500,Junho:4500,Julho:4500,Agosto:4500,Setembro:4500,Outubro:4500,Novembro:4500,Dezembro:4500},
+    "Energia Elétrica": {Fevereiro:150,Março:150,Abril:150,Maio:150,Junho:150,Julho:150,Agosto:150,Setembro:150,Outubro:150,Novembro:150,Dezembro:150},
+    "Internet": {Fevereiro:100,Março:100,Abril:100,Maio:100,Junho:100,Julho:100,Agosto:100,Setembro:100,Outubro:100,Novembro:100,Dezembro:100},
+    "Condomínio": {Fevereiro:500,Março:500,Abril:500,Maio:500,Junho:500,Julho:500,Agosto:500,Setembro:500,Outubro:500,Novembro:500,Dezembro:500},
+    "Combustível": {Fevereiro:2000,Março:2000,Abril:2000,Maio:2000,Junho:2000,Julho:2000,Agosto:2000,Setembro:2000,Outubro:2000,Novembro:2000,Dezembro:2000},
+    "Gerente Comercial": {Fevereiro:12000,Março:12000,Abril:12000,Maio:12000,Junho:12000,Julho:12000,Agosto:12000,Setembro:12000,Outubro:12000,Novembro:12000,Dezembro:12000},
+    "Simples Nacional (15% auto)": {Fevereiro:0,Março:0,Abril:0,Maio:0},
     "Anvisa + Visa Municipal": {Fevereiro:30000,Março:0,Abril:0,Maio:0}
   },
   receitas: {Fevereiro:36400,Março:60600,Abril:94100,Maio:129100},
@@ -336,13 +337,24 @@ function toggleForm(id) {
   f.classList.toggle('open');
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
+const SIMPLES_ALIQUOTA = 0.15;
+const SIMPLES_KEY = "Simples Nacional (15% auto)";
+
+function calcularSimples() {
+  MESES.forEach(m => {
+    if (!state.custos[SIMPLES_KEY]) state.custos[SIMPLES_KEY] = {};
+    state.custos[SIMPLES_KEY][m] = (state.receitas[m] || 0) * SIMPLES_ALIQUOTA;
+  });
+}
+
+
 function doLogin() {
   const e = document.getElementById('loginEmail').value;
   const p = document.getElementById('loginPassword').value;
   if (e==='admin@clanmed.com.br' && p==='admin123') {
     document.getElementById('loginPage').style.display='none';
     document.getElementById('app').style.display='block';
+    calcularSimples();
     renderAll();
   } else {
     document.getElementById('loginError').style.display='block';
@@ -470,10 +482,13 @@ function renderFinanceiro() {
       <div class="section-header">${grupo}</div>`;
     linhas.forEach(l=>{
       const val=state.custos[l]?.[state.mesSel]||0;
+      const isSimples = l === SIMPLES_KEY;
       html+=`<div style="display:flex;align-items:center;padding:9px 20px;border-bottom:1px solid #1a2032;gap:10px">
         <span style="flex:1;font-size:13px;color:#cbd5e1">${l}</span>
-        <input type="number" value="${val}" onchange="updateCusto('${l}',this.value)"
-          style="width:140px;margin:0;text-align:right;border:1px dashed #2d3748">
+        ${isSimples
+          ? `<span style="width:140px;text-align:right;font-size:13px;color:#f59e0b;padding:6px 10px;background:#111520;border-radius:6px;border:1px solid #2d3748">${fmt(val)} <span style="font-size:10px;color:#64748b">auto</span></span>`
+          : `<input type="number" value="${val}" onchange="updateCusto('${l}',this.value)" style="width:140px;margin:0;text-align:right;border:1px dashed #2d3748">`
+        }
         <button class="remove-btn" onclick="removerLinha('${grupo}','${l}')">✕</button>
       </div>`;
     });
@@ -494,7 +509,9 @@ function renderFinanceiro() {
 
 function updateReceita() {
   state.receitas[state.mesSel]=parseFloat(document.getElementById('inputReceita').value)||0;
+  calcularSimples();
   renderDashboard();
+  renderFinanceiro();
 }
 function updateCirurgiasCount() {
   state.cirurgiasCount[state.mesSel]=parseInt(document.getElementById('inputCirurgias').value)||0;
@@ -547,6 +564,7 @@ function salvarCirurgia() {
   };
   state.cirurgias.push(nova);
   state.receitas[nova.mes]=(state.receitas[nova.mes]||0)+nova.venda;
+  calcularSimples();
   if (!state.custos['Materiais Cirúrgicos']) state.custos['Materiais Cirúrgicos']={};
   state.custos['Materiais Cirúrgicos'][nova.mes]=(state.custos['Materiais Cirúrgicos'][nova.mes]||0)+nova.custo;
   renderCirurgias(); renderDashboard(); renderFinanceiro(); renderDRE();
