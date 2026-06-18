@@ -81,7 +81,7 @@
     <label>Senha</label>
     <input type="password" id="loginPassword" placeholder="••••••••">
     <div id="loginError" style="color:#ef4444;font-size:12px;text-align:center;margin-bottom:8px;display:none">Email ou senha incorretos.</div>
-    <button class="btn btn-blue" style="width:100%;margin-top:4px" onclick="doLogin()">Entrar</button>
+    <button style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:8px;padding:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:4px" onclick="(function(){var e=document.getElementById('loginEmail').value;var p=document.getElementById('loginPassword').value;if(e==='admin@clanmed.com.br'&&p==='admin123'){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';calcularSimples();renderAll();renderEstoque();}else{document.getElementById('loginError').style.display='block';}})()">Entrar</button>
     <div class="login-hint">
       <div style="margin-bottom:6px">Acesso:</div>
       <div><span>Diretor:</span> admin@clanmed.com.br / admin123</div>
