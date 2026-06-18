@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clan Med — Governança</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0a0d14; color: #e2e8f0; min-height: 100vh; }
@@ -123,8 +123,8 @@
       <div class="grid4" id="kpisGrid"></div>
       <div id="alertaVencimento"></div>
       <div class="grid2">
-        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px">Receita por Mês</div><canvas id="chartReceita" height="120"></canvas></div>
-        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px">Lucro por Mês</div><canvas id="chartLucro" height="120"></canvas></div>
+        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px">Receita por Mês</div><div id="chartReceita" style="height:120px;display:flex;align-items:flex-end;gap:8px"></div></div>
+        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px">Lucro por Mês</div><div id="chartLucro" style="height:120px;display:flex;align-items:flex-end;gap:8px"></div></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="section-header">Evolução Mensal</div>
@@ -343,9 +343,7 @@ let state = {
     {id:2,nome:"AFE ANVISA 2026",categoria:"Sanitário & ANVISA",subcategoria:"AFE (Autorização de Funcionamento)",dataUpload:"2026-02-15",validade:"2027-02-15",uploadedBy:"Administrador",tamanho:"1.2 MB",tipo:"PDF"},
     {id:3,nome:"Licença Sanitária Municipal",categoria:"Sanitário & ANVISA",subcategoria:"Licença Sanitária",dataUpload:"2026-01-20",validade:"2026-12-31",uploadedBy:"Administrador",tamanho:"890 KB",tipo:"PDF"}
   ],
-  docFiltro: "Todas",
-  chartReceita: null,
-  chartLucro: null
+  docFiltro: "Todas"
 };
 
 const ESTOQUE = [
@@ -543,13 +541,24 @@ function renderDashboard() {
   rows+=`<tr class="total-row"><td class="left">TOTAL</td><td style="color:#a78bfa">${totalCir}</td><td style="color:#3b82f6">${fmt(tg.receita)}</td><td style="color:#f59e0b">${fmt(tg.custo)}</td><td style="color:#10b981">${fmt(tg.lucro)}</td><td style="color:#10b981">${tg.receita>0?pct(tg.lucro/tg.receita):'—'}</td></tr>`;
   document.getElementById('tabelaMensal').innerHTML=rows;
 
-  const labels=mesesAtivos.map(m=>m.slice(0,3));
-  const recVals=mesesAtivos.map(m=>state.receitas[m]||0);
-  const lucVals=mesesAtivos.map(m=>Math.max(lucro(m),0));
-  if(state.chartReceita) state.chartReceita.destroy();
-  if(state.chartLucro) state.chartLucro.destroy();
-  state.chartReceita=new Chart(document.getElementById('chartReceita'),{type:'bar',data:{labels,datasets:[{data:recVals,backgroundColor:'#3b82f6',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1e2535'},ticks:{color:'#64748b'}},y:{grid:{color:'#1e2535'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
-  state.chartLucro=new Chart(document.getElementById('chartLucro'),{type:'bar',data:{labels,datasets:[{data:lucVals,backgroundColor:'#10b981',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1e2535'},ticks:{color:'#64748b'}},y:{grid:{color:'#1e2535'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+  // Draw charts with pure CSS bars
+  function drawBar(elId, data, color) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const max = Math.max(...data.map(d=>d.v), 1);
+    el.innerHTML = data.map(d=>`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%">
+        <div style="font-size:10px;color:#94a3b8;text-align:center">${fmt(d.v).replace('R$\u00a0','')}</div>
+        <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+          <div style="width:100%;height:${Math.max((d.v/max)*80,2)}px;background:${color};border-radius:4px 4px 0 0;opacity:0.85"></div>
+        </div>
+        <div style="font-size:10px;color:#64748b">${d.l}</div>
+      </div>`).join('');
+  }
+
+  const mesesAtivos=MESES.filter(m=>(state.receitas[m]||0)>0);
+  drawBar('chartReceita', mesesAtivos.map(m=>({l:m.slice(0,3),v:state.receitas[m]||0})), '#3b82f6');
+  drawBar('chartLucro', mesesAtivos.map(m=>({l:m.slice(0,3),v:Math.max(lucro(m),0)})), '#10b981');
 }
 
 function checkAlertas() {
