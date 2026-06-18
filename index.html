@@ -113,6 +113,7 @@
     <button onclick="showPage('operacional',this)">⚕ Operacional</button>
     <button onclick="showPage('documentos',this)">📁 Documentos</button>
     <button onclick="showPage('dre',this)">📊 DRE</button>
+    <button onclick="showPage('estoque',this)">📦 Estoque</button>
     <button onclick="showPage('config',this)">⚙ Configurar</button>
   </nav>
 
@@ -211,6 +212,31 @@
       <div class="card" style="padding:0;overflow:hidden">
         <div class="section-header" style="font-size:14px;padding:16px 20px">DRE · Demonstrativo de Resultados · Clan Med</div>
         <table><thead><tr id="dreHeader"></tr></thead><tbody id="dreBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div class="page" id="page-estoque">
+      <div class="grid4" id="estoqueKpis"></div>
+      <div id="estoqueAlerta" style="margin-bottom:20px"></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📦 Estoque OPME — Neurologia</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-gray" style="padding:4px 10px;font-size:11px" onclick="filtrarEstoque('todos')">Todos</button>
+            <button class="btn btn-red" style="padding:4px 10px;font-size:11px" onclick="filtrarEstoque('repor')">⚠ Repor</button>
+          </div>
+        </div>
+        <table><thead><tr>
+          <th class="left">Material</th>
+          <th>Saldo</th>
+          <th>Custo Unit.</th>
+          <th>Total Custo</th>
+          <th>Preço Venda</th>
+          <th>Pot. Venda</th>
+          <th>Margem</th>
+          <th>Repor</th>
+        </tr></thead><tbody id="tabelaEstoque"></tbody></table>
       </div>
     </div>
 
@@ -322,7 +348,92 @@ let state = {
   chartLucro: null
 };
 
-const DOC_CATS = {
+const ESTOQUE = [
+  {desc:"BROCA CORTANTE 4,00X120.0 ER-02",saldo:5,custo:160,venda:1900,limite_compra:0},
+  {desc:"BROCA CORTANTE 5,00X120.0 ER-02",saldo:4,custo:160,venda:1900,limite_compra:0},
+  {desc:"BROCA DE TREPANAÇÃO ENC HUDSON 11/7",saldo:5,custo:350,venda:2200,limite_compra:3},
+  {desc:"BROCA DE TREPANAÇÃO ENC HUDSON 14/11",saldo:7,custo:350,venda:2200,limite_compra:6},
+  {desc:"BROCA DIAMANTADA 4,00X120,0 ER-02",saldo:4,custo:260,venda:1900,limite_compra:0},
+  {desc:"BROCA DIAMANTADA 5,00X120,0 ER-02",saldo:5,custo:260,venda:1900,limite_compra:0},
+  {desc:"CIMENTO CRAN-MAXX",saldo:2,custo:989,venda:4700,limite_compra:3},
+  {desc:"CIMENTO VERT-MAXX",saldo:1,custo:549,venda:3800,limite_compra:4},
+  {desc:"COMPRESSAS NEURO 13X13",saldo:5,custo:24,venda:400,limite_compra:13},
+  {desc:"COMPRESSAS NEURO 13X38MM",saldo:5,custo:24,venda:400,limite_compra:13},
+  {desc:"COMPRESSAS NEURO 13X51MM",saldo:5,custo:24,venda:400,limite_compra:13},
+  {desc:"COMPRESSAS NEURO 19X19MM",saldo:5,custo:24,venda:400,limite_compra:13},
+  {desc:"COMPRESSAS NEURO 25X25MM",saldo:9,custo:24,venda:400,limite_compra:9},
+  {desc:"COMPRESSAS NEURO 25X76MM",saldo:8,custo:24,venda:400,limite_compra:10},
+  {desc:"COMPRESSAS NEURO 38X38MM",saldo:8,custo:24,venda:400,limite_compra:10},
+  {desc:"COMPRESSAS NEURO 76X76MM",saldo:5,custo:24,venda:400,limite_compra:19},
+  {desc:"DRENAGEM VENTRICULAR EXTERNA FREE FLOW",saldo:9,custo:338,venda:1900,limite_compra:10},
+  {desc:"FRESA CRANIOTOMO 1,60X20,0 ER-02",saldo:7,custo:330,venda:2900,limite_compra:10},
+  {desc:"KIT CANULA MONIT. NEUROFIS. (FACIAL)",saldo:11,custo:250,venda:8000,limite_compra:4},
+  {desc:"KIT CANULA MONIT. NEUROFIS. (LARINGEO)",saldo:19,custo:350,venda:8000,limite_compra:36},
+  {desc:"LAMINA MARCLAMP CUT IQ",saldo:10,custo:1195,venda:5100,limite_compra:30},
+  {desc:"PINÇA BIPOLAR DISSECT MAX 22C X 2,5",saldo:5,custo:539.55,venda:2400,limite_compra:22},
+  {desc:"SISTEMA DERIVAÇÃO HIDROCEFALIA ESPHERA DUO A",saldo:1,custo:528,venda:3100,limite_compra:4},
+  {desc:"SISTEMA DERIVAÇÃO HIDROCEFALIA ESPHERA DUO B",saldo:2,custo:528,venda:3100,limite_compra:3},
+  {desc:"SISTEMA DERIVAÇÃO HIDROCEFALIA INFANTIL A",saldo:1,custo:528,venda:3100,limite_compra:2},
+  {desc:"SISTEMA DERIVAÇÃO HIDROCEFALIA INFANTIL B",saldo:2,custo:528,venda:3100,limite_compra:1},
+  {desc:"SISTEMA DERIVAÇÃO HIDROCEFALIA NEONATAL PLUS",saldo:3,custo:528,venda:3100,limite_compra:1},
+  {desc:"SPLINT NASAL INTERNO",saldo:4,custo:50,venda:300,limite_compra:10},
+  {desc:"TUNELIZADOR CATETER PERITONEAL 35CM",saldo:2,custo:186,venda:2100,limite_compra:1},
+  {desc:"TUNELIZADOR CATETER PERITONEAL 65CM",saldo:2,custo:204,venda:2100,limite_compra:1},
+  {desc:"TUNELIZADOR CATETER PERITONEAL 50CM",saldo:2,custo:223,venda:2100,limite_compra:1},
+  {desc:"CATETER MEDIÇÃO PRESSÃO/TEMP INTRACRANIANA",saldo:2,custo:2929,venda:8500,limite_compra:8},
+  {desc:"CATETER DE DRENAGEM VENTRICULAR",saldo:1,custo:3116,venda:8500,limite_compra:3},
+  {desc:"PÓ HEMOSTÁTICO (EQUICEL)",saldo:7,custo:640,venda:2500,limite_compra:0},
+  {desc:"HEMOSTÁTICO EM GEL (OXITAMP)",saldo:7,custo:1050,venda:3600,limite_compra:20},
+  {desc:"VERT-SYS LEAN - CONJ. VERT.",saldo:1,custo:599,venda:6800,limite_compra:4},
+  {desc:"DURA DRY FILME 7,5X7,5CM",saldo:2,custo:2200,venda:7100,limite_compra:3},
+];
+
+let estoqueFiltro = 'todos';
+
+function filtrarEstoque(f) { estoqueFiltro=f; renderEstoque(); }
+
+function renderEstoque() {
+  const totalCusto = ESTOQUE.reduce((a,i)=>a+i.saldo*i.custo,0);
+  const totalVenda = ESTOQUE.reduce((a,i)=>a+i.saldo*i.venda,0);
+  const itensRepor = ESTOQUE.filter(i=>i.limite_compra>0).length;
+  const margem = ((totalVenda-totalCusto)/totalCusto*100).toFixed(1);
+
+  document.getElementById('estoqueKpis').innerHTML=`
+    <div class="card"><div class="kpi-label">Total Investido</div><div class="kpi-val" style="color:#f59e0b">${fmt(totalCusto)}</div></div>
+    <div class="card"><div class="kpi-label">Potencial de Venda</div><div class="kpi-val" style="color:#3b82f6">${fmt(totalVenda)}</div></div>
+    <div class="card"><div class="kpi-label">Margem Potencial</div><div class="kpi-val" style="color:#10b981">${margem}%</div></div>
+    <div class="card"><div class="kpi-label">Itens para Repor</div><div class="kpi-val" style="color:#ef4444">${itensRepor}</div></div>`;
+
+  const topRepor = ESTOQUE.filter(i=>i.limite_compra>0).sort((a,b)=>b.limite_compra-a.limite_compra).slice(0,3);
+  if(topRepor.length>0) {
+    document.getElementById('estoqueAlerta').innerHTML=`
+      <div class="alerta"><div class="alerta-title">⚠ Itens com Maior Necessidade de Reposição</div>
+      ${topRepor.map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2535">
+        <span style="font-size:13px;color:#cbd5e1">${i.desc}</span>
+        <span class="badge" style="background:#ef444422;color:#ef4444;border:1px solid #ef444444">Repor ${i.limite_compra} unid.</span>
+      </div>`).join('')}</div>`;
+  }
+
+  const lista = estoqueFiltro==='repor' ? ESTOQUE.filter(i=>i.limite_compra>0) : ESTOQUE;
+  document.getElementById('tabelaEstoque').innerHTML = lista.map((i,idx)=>{
+    const totalC=i.saldo*i.custo;
+    const totalV=i.saldo*i.venda;
+    const mg=((i.venda-i.custo)/i.custo*100).toFixed(0);
+    const repor = i.limite_compra>0;
+    return `<tr style="background:${idx%2===0?'#141824':'#111520'}">
+      <td class="left" style="font-size:12px">${i.desc}</td>
+      <td style="color:${i.saldo<=2?'#ef4444':'#a78bfa'};font-weight:600">${i.saldo}</td>
+      <td style="color:#64748b">${fmt(i.custo)}</td>
+      <td style="color:#f59e0b">${fmt(totalC)}</td>
+      <td style="color:#64748b">${fmt(i.venda)}</td>
+      <td style="color:#3b82f6">${fmt(totalV)}</td>
+      <td style="color:#10b981">${mg}%</td>
+      <td>${repor?`<span class="badge" style="background:#ef444422;color:#ef4444;border:1px solid #ef444444">${i.limite_compra} unid.</span>`:'<span style="color:#374151;font-size:11px">OK</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+
   "Societário": ["Contrato Social","Alteração Contratual","Ata de Reunião","Procuração"],
   "Sanitário & ANVISA": ["AFE (Autorização de Funcionamento)","Licença Sanitária","Certificado de Boas Práticas","Notificação ANVISA","Renovação de Licença"],
   "Fiscal & Tributário": ["CNPJ","Inscrição Municipal","Simples Nacional","Certidão Negativa de Débitos"],
@@ -377,7 +488,7 @@ function doLogin() {
     document.getElementById('loginPage').style.display='none';
     document.getElementById('app').style.display='block';
     calcularSimples();
-    renderAll();
+    renderAll(); renderEstoque();
   } else { document.getElementById('loginError').style.display='block'; }
 }
 function logout() {
@@ -397,6 +508,7 @@ function showPage(id,btn) {
   if(id==='operacional') renderCirurgias();
   if(id==='documentos') renderDocumentos();
   if(id==='dre') renderDRE();
+  if(id==='estoque') renderEstoque();
   if(id==='config') renderConfig();
 }
 
