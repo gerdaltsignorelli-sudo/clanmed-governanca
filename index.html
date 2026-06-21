@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clan Med — Governança</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0a0d14;color:#e2e8f0;min-height:100vh}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{width:380px;background:#141824;border:1px solid #1e2535;border-radius:16px;padding:40px}
+.logo-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px}
+.login-title{font-size:22px;font-weight:800;color:#f1f5f9;text-align:center}
+.login-sub{font-size:12px;color:#64748b;text-align:center;margin:4px 0 24px}
+.field-label{font-size:11px;color:#64748b;display:block;margin-bottom:5px;text-transform:uppercase}
+.field-input{background:#0f1117;border:1px solid #2d3748;border-radius:7px;padding:10px 12px;color:#e2e8f0;font-size:14px;width:100%;margin-bottom:14px}
+.login-btn{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:8px;padding:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+.login-hint{margin-top:20px;padding:14px;background:#0f1117;border-radius:8px;border:1px solid #1e2535;font-size:11px;color:#64748b}
+.login-hint b{color:#3b82f6}
+.err{color:#ef4444;font-size:12px;text-align:center;margin-bottom:8px;display:none}
+header{background:#141824;border-bottom:1px solid #1e2535;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hlogo{display:flex;align-items:center;gap:12px}
+.hicon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff}
+.hname{font-size:15px;font-weight:800;color:#f1f5f9}
+.hsub{font-size:11px;color:#64748b}
+.hright{display:flex;align-items:center;gap:10px}
+.chip{display:flex;align-items:center;gap:8px;background:#1e2535;padding:6px 12px;border-radius:20px}
+.avatar{width:26px;height:26px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644}
+.alert-badge{font-size:11px;background:#7f1d1d;color:#fca5a5;padding:4px 10px;border-radius:20px;border:1px solid #ef444444;display:none}
+.out-btn{background:none;border:1px solid #2d3748;border-radius:7px;padding:6px 12px;color:#64748b;font-size:12px;cursor:pointer}
+nav{background:#0f1117;border-bottom:1px solid #1e2535;padding:0 24px;display:flex;gap:2px;overflow-x:auto}
+.nav-btn{padding:12px 16px;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap}
+.nav-btn.active{color:#3b82f6;border-bottom-color:#3b82f6}
+.main{padding:24px;max-width:1200px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.card{background:#141824;border:1px solid #1e2535;border-radius:12px;padding:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.kpi-label{font-size:11px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.kpi-val{font-size:22px;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 14px;text-align:right;color:#64748b;font-weight:600;font-size:11px;text-transform:uppercase;background:#1e2535}
+th.L{text-align:left;padding-left:20px}
+td{padding:10px 14px;text-align:right;color:#cbd5e1;border-bottom:1px solid #1e2535}
+td.L{text-align:left;padding-left:20px;color:#f1f5f9}
+tr:nth-child(even) td{background:#111520}
+.sec-hdr{padding:10px 20px;background:#1e2535;font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase}
+.sub-row td{background:#1a2032!important;color:#f59e0b;font-weight:600}
+.tot-row td{background:#1e2a3a!important;color:#f1f5f9;font-weight:700;font-size:14px}
+.luc-row td{background:#052e16!important;color:#10b981;font-weight:700;font-size:14px}
+.mrg-row td{background:#0a1628!important;color:#10b981;font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;background:#10b981;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none}
+.mes-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.btn{border:none;border-radius:7px;padding:9px 18px;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.btn-blue{background:#3b82f6}.btn-green{background:#10b981}.btn-gray{background:#374151}.btn-red{background:#7f1d1d;color:#fca5a5}
+.inp{background:#0f1117;border:1px solid #2d3748;border-radius:7px;padding:9px 12px;color:#e2e8f0;font-size:13px;width:100%;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.add-form{background:#141824;border:1px solid #3b82f644;border-radius:12px;padding:20px;margin-bottom:20px;display:none}
+.add-form.open{display:block}
+.page-title{font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.upload-area{border:2px dashed #2d3748;border-radius:8px;padding:20px;text-align:center;cursor:pointer;color:#64748b;font-size:13px;background:#0f1117;margin-bottom:12px}
+.doc-filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.alerta{background:#141824;border:1px solid #f59e0b44;border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.alerta-title{font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.remove-btn{background:none;border:none;color:#ef444466;cursor:pointer;font-size:16px;padding:2px 6px}
+.print-btn{background:#475569;border:none;border-radius:7px;padding:7px 14px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.print-btn:hover{background:#64748b}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.page-header h2{font-size:18px;font-weight:700;color:#f1f5f9}
+@media print{
+  header,nav,.print-btn,.mes-tabs,.add-form,.doc-filters,.alert-badge,#alertaVenc,#estAlerta .alerta-title+div:last-child{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .card,.page{background:#fff!important;border:1px solid #ccc!important;border-radius:4px!important}
+  .kpi-val{color:#000!important}
+  .kpi-label{color:#555!important}
+  th{background:#f0f0f0!important;color:#000!important}
+  td{color:#000!important;border-bottom:1px solid #eee!important}
+  .sec-hdr{background:#e0e0e0!important;color:#000!important}
+  .page{display:block!important}
+  .page:not(.active){display:none!important}
+  .grid4,.grid2{display:grid!important}
+  @page{margin:15mm}
+}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.bar-val{font-size:9px;color:#94a3b8;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.bar-body{width:100%;display:flex;align-items:flex-end;flex:1}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px}
+.bar-lbl{font-size:10px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-box">
+    <div class="logo-icon">C</div>
+    <div class="login-title">Clan Med</div>
+    <div class="login-sub">Plataforma de Governança · OPME</div>
+    <label class="field-label">Email</label>
+    <input class="field-input" type="email" id="lemail" placeholder="seu@clanmed.com.br">
+    <label class="field-label">Senha</label>
+    <input class="field-input" type="password" id="lpass" placeholder="••••••••">
+    <div class="err" id="lerr">Email ou senha incorretos.</div>
+    <button class="login-btn" id="loginBtn">Entrar</button>
+    <div class="login-hint"><div style="margin-bottom:6px">Acesso:</div><div><b>Diretor:</b> admin@clanmed.com.br / admin123</div></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="hlogo">
+      <div class="hicon">C</div>
+      <div><div class="hname">Clan Med</div><div class="hsub">Plataforma de Governança · OPME</div></div>
+    </div>
+    <div class="hright">
+      <div class="alert-badge" id="alertaBadge"></div>
+      <div class="chip">
+        <div class="avatar">A</div>
+        <span style="font-size:12px;color:#94a3b8">Administrador</span>
+        <span class="badge">Diretor</span>
+      </div>
+      <button class="out-btn" id="outBtn">Sair</button>
+    </div>
+  </header>
+  <nav>
+    <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
+    <button class="nav-btn" data-page="financeiro">₿ Financeiro</button>
+    <button class="nav-btn" data-page="operacional">⚕ Operacional</button>
+    <button class="nav-btn" data-page="documentos">📁 Documentos</button>
+    <button class="nav-btn" data-page="dre">📊 DRE</button>
+    <button class="nav-btn" data-page="investimento">💼 Investimento</button>
+    <button class="nav-btn" data-page="estoque">📦 Estoque</button>
+    <button class="nav-btn" data-page="config">⚙ Configurar</button>
+  </nav>
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><h2>Dashboard · Clan Med</h2><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button></div>
+      <div class="grid4" id="kpisGrid"></div>
+      <div id="alertaVenc"></div>
+      <div class="grid2">
+        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:8px">Receita por Mês</div><div class="bar-chart" id="chartRec"></div></div>
+        <div class="card"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:8px">Lucro por Mês</div><div class="bar-chart" id="chartLuc"></div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="sec-hdr">Evolução Mensal</div>
+        <table><thead><tr><th class="L">Mês</th><th>Cirurgias</th><th>Receita</th><th>Custo</th><th>Lucro</th><th>Margem</th></tr></thead>
+        <tbody id="tblMensal"></tbody></table>
+      </div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="page" id="page-financeiro">
+      <div class="page-header"><h2>Financeiro · Clan Med</h2><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button></div>
+      <div class="mes-tabs" id="mesTabs"></div>
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card"><label class="field-label" style="margin-bottom:5px">Receita do Mês (R$)</label><input class="inp" type="number" id="inpRec" style="margin:0"></div>
+        <div class="card"><label class="field-label" style="margin-bottom:5px">Nº de Cirurgias</label><input class="inp" type="number" id="inpCir" style="margin:0" readonly></div>
+      </div>
+      <div id="custosGrupos"></div>
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;border:1px solid #2d4a6a;margin-top:12px" id="resultMes"></div>
+    </div>
+
+    <!-- OPERACIONAL -->
+    <div class="page" id="page-operacional">
+      <div class="page-title">Registro de Cirurgias & Materiais<div style="display:flex;gap:8px"><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button><button class="btn btn-blue" id="btnNovaCir">+ Nova Cirurgia</button></div></div>
+      <div class="add-form" id="formCir">
+        <div style="font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:16px">Nova Cirurgia</div>
+        <div class="g3">
+          <div><label class="field-label">Paciente</label><input class="inp" id="c_pac"></div>
+          <div><label class="field-label">Prontuário</label><input class="inp" id="c_pron"></div>
+          <div><label class="field-label">Data</label><input class="inp" type="date" id="c_data"></div>
+          <div><label class="field-label">Médico</label><input class="inp" id="c_med"></div>
+          <div><label class="field-label">CRM</label><input class="inp" id="c_crm"></div>
+          <div><label class="field-label">Hospital</label><input class="inp" id="c_hosp" value="H.M.N.S.N."></div>
+          <div><label class="field-label">Materiais</label><input class="inp" id="c_mat"></div>
+          <div><label class="field-label">Lote</label><input class="inp" id="c_lote"></div>
+          <div><label class="field-label">Qtd</label><input class="inp" type="number" id="c_qtd" value="1"></div>
+          <div><label class="field-label">Custo Total (R$)</label><input class="inp" type="number" id="c_cus" value="0"></div>
+          <div><label class="field-label">Venda Total (R$)</label><input class="inp" type="number" id="c_ven" value="0"></div>
+          <div><label class="field-label">Mês</label><select class="inp" id="c_mes" style="margin:0"></select></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-green" id="btnSalvaCir">Salvar</button>
+          <button class="btn btn-gray" id="btnCancelCir">Cancelar</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th class="L">Paciente</th><th>Data</th><th class="L">Médico</th><th class="L">Materiais</th><th>Custo</th><th>Venda</th><th>Margem</th><th>Mês</th><th></th></tr></thead>
+        <tbody id="tblCir"></tbody></table>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="page" id="page-documentos">
+      <div class="page-title">Documentos Institucionais<div style="display:flex;gap:8px"><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button><button class="btn btn-blue" id="btnNovoDoc">+ Novo Documento</button></div></div>
+      <div class="add-form" id="formDoc">
+        <div style="font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:16px">Cadastrar Documento</div>
+        <div class="g2">
+          <div><label class="field-label">Nome</label><input class="inp" id="d_nome" placeholder="Ex: AFE ANVISA 2026"></div>
+          <div><label class="field-label">Categoria</label><select class="inp" id="d_cat"></select></div>
+          <div><label class="field-label">Tipo</label><select class="inp" id="d_sub"></select></div>
+          <div><label class="field-label">Validade</label><input class="inp" type="date" id="d_val"></div>
+          <div style="grid-column:span 2">
+            <label class="field-label">Arquivo</label>
+            <div class="upload-area" id="uploadArea">Clique para selecionar arquivo</div>
+            <input type="file" id="d_arq" style="display:none" accept=".pdf,.doc,.docx,.jpg,.png">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-green" id="btnSalvaDoc">Salvar</button>
+          <button class="btn btn-gray" id="btnCancelDoc">Cancelar</button>
+        </div>
+      </div>
+      <div class="doc-filters" id="docFiltros"></div>
+      <div id="docLista"></div>
+    </div>
+
+    <!-- DRE -->
+    <div class="page" id="page-dre">
+      <div class="page-header"><h2>DRE · Demonstrativo de Resultados</h2><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="sec-hdr" style="font-size:14px;padding:16px 20px">DRE · Demonstrativo de Resultados · Clan Med</div>
+        <table><thead><tr id="dreHdr"></tr></thead><tbody id="dreBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INVESTIMENTO -->
+    <div class="page" id="page-investimento">
+      <div class="page-header"><h2>Investimento em Materiais & Estoque · Clan Med</h2><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button></div>
+
+      <div class="card" style="border:1px solid #f59e0b66;margin-bottom:20px;background:linear-gradient(135deg,#1a1410,#141824)">
+        <div style="font-size:12px;color:#f59e0b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">💰 Total Investido em Compras (Caixa Pago)</div>
+        <div style="font-size:36px;font-weight:800;color:#f59e0b">R$ 217.598,09</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px">Materiais adquiridos (R$ 53.725,85) + Notas Fiscais de fornecedores pagas (R$ 163.872,24)</div>
+      </div>
+
+      <div class="grid2" style="margin-bottom:20px">
+        <div class="card" style="border:1px solid #3b82f666">
+          <div class="kpi-label">Estoque Atual Disponível (Custo)</div>
+          <div class="kpi-val" style="color:#3b82f6;font-size:28px">R$ 126.701,90</div>
+          <div style="font-size:11px;color:#64748b;margin-top:6px">Materiais ainda não consumidos, prontos para uso em cirurgias futuras</div>
+        </div>
+        <div class="card" style="border:1px solid #10b98166">
+          <div class="kpi-label">Potencial de Venda do Estoque</div>
+          <div class="kpi-val" style="color:#10b981;font-size:28px">R$ 1.000.200,00</div>
+          <div style="font-size:11px;color:#64748b;margin-top:6px">Receita futura estimada se todo o estoque atual for utilizado em cirurgias</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+        <div class="sec-hdr">📦 Estoque por Categoria — Custo x Potencial de Venda</div>
+        <table><thead><tr><th class="L">Categoria</th><th>Custo em Estoque</th><th>Potencial de Venda</th><th>Multiplicador</th></tr></thead>
+        <tbody>
+          <tr style="background:#141824"><td class="L" style="font-weight:600">🧠 Neurologia</td><td style="color:#f59e0b">R$ 73.087,75</td><td style="color:#10b981">R$ 565.100,00</td><td style="color:#a78bfa">7,7x</td></tr>
+          <tr style="background:#111520"><td class="L" style="font-weight:600">💀 Crânio (Traumec)</td><td style="color:#f59e0b">R$ 21.314,85</td><td style="color:#10b981">R$ 106.600,00</td><td style="color:#a78bfa">5,0x</td></tr>
+          <tr style="background:#141824"><td class="L" style="font-weight:600">🦴 Coluna Lombar (Osteomed)</td><td style="color:#f59e0b">R$ 32.299,30</td><td style="color:#10b981">R$ 328.500,00</td><td style="color:#a78bfa">10,2x</td></tr>
+          <tr class="tot-row"><td class="L">TOTAL</td><td style="color:#f59e0b">R$ 126.701,90</td><td style="color:#10b981">R$ 1.000.200,00</td><td style="color:#a78bfa">7,9x</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="sec-hdr">🧾 Origem do Investimento — Compras x Pagamentos</div>
+        <table><thead><tr><th class="L">Componente</th><th>Valor</th><th class="L">Observação</th></tr></thead>
+        <tbody>
+          <tr style="background:#141824"><td class="L">Materiais adquiridos (lista detalhada)</td><td style="color:#f59e0b">R$ 53.725,85</td><td class="L" style="color:#64748b;font-size:12px">Itens de coluna/crânio listados individualmente</td></tr>
+          <tr style="background:#111520"><td class="L">Notas Fiscais pagas a fornecedores</td><td style="color:#f59e0b">R$ 163.872,24</td><td class="L" style="color:#64748b;font-size:12px">22 NFs de 13 fornecedores diferentes — já desembolsado do caixa</td></tr>
+          <tr class="tot-row"><td class="L">TOTAL INVESTIDO</td><td style="color:#f59e0b">R$ 217.598,09</td><td class="L"></td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="alerta" style="margin-top:20px;border-color:#3b82f666">
+        <div class="alerta-title" style="color:#3b82f6">ℹ Nota para Reunião</div>
+        <div style="font-size:13px;color:#cbd5e1;line-height:1.6">
+          Os valores acima representam o <b>capital já investido</b> em materiais OPME (crânio, coluna lombar e neurologia geral).
+          Este investimento ainda <b>não foi totalmente lançado no DRE mensal</b> — apenas a parcela já efetivamente consumida em cirurgias realizadas
+          aparece como custo operacional. O saldo de R$ 126.701,90 em estoque é um <b>ativo da empresa</b> com potencial de gerar
+          R$ 1.000.200,00 em receita futura conforme for utilizado nas próximas cirurgias.
+        </div>
+      </div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div class="page" id="page-estoque">
+      <div class="page-header"><h2>Estoque OPME · Clan Med</h2><button class="print-btn" onclick="window.print()">🖨 Exportar PDF</button></div>
+      <div class="mes-tabs">
+        <button class="btn btn-blue" id="btnEstNeuro" style="opacity:1">🧠 Neurologia</button>
+        <button class="btn btn-gray" id="btnEstColuna">🦴 Coluna/Ortopedia</button>
+      </div>
+
+      <!-- NEUROLOGIA SUBPAGE -->
+      <div id="estoqueNeuro">
+        <div class="grid4" id="estKpis"></div>
+        <div id="estAlerta" style="margin-bottom:20px"></div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="sec-hdr" style="display:flex;justify-content:space-between;align-items:center">
+            <span>📦 Estoque OPME — Neurologia</span>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-gray" style="padding:4px 10px;font-size:11px" id="btnEstTodos">Todos</button>
+              <button class="btn btn-red" style="padding:4px 10px;font-size:11px" id="btnEstRepor">⚠ Repor</button>
+            </div>
+          </div>
+          <table><thead><tr><th class="L">Material</th><th>Saldo</th><th>Custo Unit.</th><th>Total Custo</th><th>Preço Venda</th><th>Pot. Venda</th><th>Margem</th><th>Repor</th></tr></thead>
+          <tbody id="tblEst"></tbody></table>
+        </div>
+      </div>
+
+      <!-- COLUNA/ORTOPEDIA SUBPAGE -->
+      <div id="estoqueColuna" style="display:none">
+        <div class="grid4" id="colKpis"></div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+          <div class="sec-hdr">📋 Materiais Adquiridos — Coluna/Ortopedia (TRAUMEC / OSTEOMED)</div>
+          <table><thead><tr><th class="L">Material</th><th>Qtd</th><th class="L">Marca</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead>
+          <tbody id="tblColuna"></tbody></table>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="sec-hdr">🧾 Notas Fiscais — Fornecedores</div>
+          <table><thead><tr><th class="L">Fornecedor</th><th class="L">Nº NF</th><th>Data Emissão</th><th>Valor</th></tr></thead>
+          <tbody id="tblNFs"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="page" id="page-config">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:16px">➕ Adicionar Linha de Custo</div>
+        <div style="display:flex;gap:10px">
+          <select class="inp" id="cfgGrupo" style="flex:0 0 220px;margin:0"></select>
+          <input class="inp" id="cfgLinha" placeholder="Nome da nova linha..." style="flex:1;margin:0">
+          <button class="btn btn-blue" id="btnAddLinha">Adicionar</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:16px">📁 Criar Novo Grupo</div>
+        <div style="display:flex;gap:10px">
+          <input class="inp" id="cfgGrupoNome" placeholder="Ex: Marketing & Comercial" style="flex:1;margin:0">
+          <button class="btn btn-green" id="btnAddGrupo">Criar</button>
+        </div>
+      </div>
+      <div class="card"><div style="font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:16px">📋 Estrutura Atual</div><div id="cfgEstrutura"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── DADOS ──────────────────────────────────────────────────────────
+var MESES=["Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var SIMPLES_KEY="Simples Nacional (15% auto)";
+var today=new Date().toISOString().split('T')[0];
+
+function initFixo(v){var o={};MESES.forEach(function(m){o[m]=v;});return o;}
+
+var state={
+  mesSel:"Maio",
+  categorias:{
+    "Custos Cirúrgicos":["Materiais Cirúrgicos","Monitorização","Apoio Operacional (Dario/Jonhatan)"],
+    "Custos Operacionais Fixos":["Locação da Sede","Farmacêutica","Funcionário Administrativo","Energia Elétrica","Internet","Condomínio","Combustível","Gerente Comercial"],
+    "Tributos & Licenças":[SIMPLES_KEY,"Anvisa + Visa Municipal"]
+  },
+  custos:{
+    "Materiais Cirúrgicos":{Fevereiro:4009.56,Março:8380.66,Abril:10073.76,Maio:18617.25},
+    "Monitorização":{Fevereiro:400,Março:1200,Abril:1200,Maio:2400},
+    "Apoio Operacional (Dario/Jonhatan)":initFixo(10000),
+    "Locação da Sede":initFixo(2800),
+    "Farmacêutica":initFixo(5500),
+    "Funcionário Administrativo":initFixo(4500),
+    "Energia Elétrica":initFixo(150),
+    "Internet":initFixo(100),
+    "Condomínio":initFixo(500),
+    "Combustível":initFixo(2000),
+    "Gerente Comercial":initFixo(12000),
+    "Simples Nacional (15% auto)":{},
+    "Anvisa + Visa Municipal":{Fevereiro:30000,Março:0,Abril:0,Maio:0}
+  },
+  receitas:{Fevereiro:36400,Março:60600,Abril:94100,Maio:129100},
+  docs:[
+    {id:1,nome:"Contrato Social - Clan Med",categoria:"Societário",subcategoria:"Contrato Social",dataUpload:"2026-01-10",validade:null,tipo:"PDF"},
+    {id:2,nome:"AFE ANVISA 2026",categoria:"Sanitário & ANVISA",subcategoria:"AFE",dataUpload:"2026-02-15",validade:"2027-02-15",tipo:"PDF"},
+    {id:3,nome:"Licença Sanitária Municipal",categoria:"Sanitário & ANVISA",subcategoria:"Licença Sanitária",dataUpload:"2026-01-20",validade:"2026-12-31",tipo:"PDF"}
+  ],
+  docFiltro:"Todas",
+  estFiltro:"todos",
+  cirurgias:[
+    {id:1,paciente:"Francisco Paiva dos Santos",data:"2026-02-01",medico:"Rafael Mitraud",materiais:"Broca Trepan. 14/11",custo:350,venda:2200,mes:"Fevereiro"},
+    {id:2,paciente:"Nilza Lourenço da Silva Mendes",data:"2026-02-04",medico:"José Carlos Mariano",materiais:"Broca Trepan. 14/11",custo:350,venda:2200,mes:"Fevereiro"},
+    {id:3,paciente:"Abel Gomes da Silva",data:"2026-02-05",medico:"José Carlos Mariano",materiais:"Fresa de Corte Lateral",custo:660,venda:5800,mes:"Fevereiro"},
+    {id:4,paciente:"Luiz Silva Moura",data:"2026-02-06",medico:"Bruno Albuquerque",materiais:"Kit Neuro + Selador",custo:1324.78,venda:13100,mes:"Fevereiro"},
+    {id:5,paciente:"Roseli Martins de Oliveira",data:"2026-02-13",medico:"Bruno Albuquerque",materiais:"Kit Neuro + Selador",custo:1324.78,venda:13100,mes:"Fevereiro"},
+    {id:6,paciente:"Maria Clara Thomaz Guimarães",data:"2026-03-01",medico:"Bruno Albuquerque",materiais:"Kit Neuro + Selador",custo:1324.78,venda:13100,mes:"Março"},
+    {id:7,paciente:"Ohana de Sá Oliveira",data:"2026-03-01",medico:"Bruno Albuquerque",materiais:"Kit Neuro Estimulador",custo:350,venda:8000,mes:"Março"},
+    {id:8,paciente:"Graziela Anacleto de Oliveira",data:"2026-03-01",medico:"Christiano Vilela",materiais:"Splint + Compressas + Hemostático",custo:762,venda:4000,mes:"Março"},
+    {id:9,paciente:"Natsuo Shibazaki",data:"2026-03-12",medico:"Rafael Mitraud",materiais:"Cabo + Pinça Bipolar",custo:539.55,venda:2400,mes:"Março"},
+    {id:10,paciente:"Thaynan Feliciano Aredes",data:"2026-03-15",medico:"Christiano Vilela",materiais:"Splint + Hemostático Gel",custo:1100,venda:3900,mes:"Março"},
+    {id:11,paciente:"Francisco Carlos de Oliveira",data:"2026-03-18",medico:"Bruno Albuquerque",materiais:"Kit Neuro + Selador + Hemostático",custo:1964.78,venda:15600,mes:"Março"},
+    {id:12,paciente:"João Lima Alves",data:"2026-03-22",medico:"Christiano Vilela",materiais:"Cabo + Pinça + Hemostático + Selador",custo:1989.55,venda:11400,mes:"Março"},
+    {id:13,paciente:"Catharina de Oliveira Souza",data:"2026-03-25",medico:"Rafael Mitraud",materiais:"Broca Trepan. 14/11",custo:350,venda:2200,mes:"Março"},
+    {id:14,paciente:"Marta da Costa Souza",data:"2026-04-01",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador",custo:1324.78,venda:13100,mes:"Abril"},
+    {id:15,paciente:"Aurea Andrea Faria Alcantara",data:"2026-04-08",medico:"José Lucas Queiroz",materiais:"Cabo + Pinça + Kit Neuro",custo:889.55,venda:10400,mes:"Abril"},
+    {id:16,paciente:"José de Carvalho Neto",data:"2026-04-10",medico:"Rafael Mitraud",materiais:"Fresa + Hemostático + Parafusos",custo:4547.1,venda:46600,mes:"Abril"},
+    {id:17,paciente:"Elenilda Silva Martiniano",data:"2026-04-12",medico:"Rafael Mitraud",materiais:"Broca Trepanação 14/11",custo:350,venda:2200,mes:"Abril"},
+    {id:18,paciente:"Egidio Medeiros Filho",data:"2026-04-13",medico:"Rafael Mitraud",materiais:"Derivação Ventricular Externa",custo:338,venda:1900,mes:"Abril"},
+    {id:19,paciente:"Luiz Henrique de Souza Carlos",data:"2026-04-17",medico:"José Carlos Mariano",materiais:"Fresa Cortante 5MM",custo:160,venda:1900,mes:"Abril"},
+    {id:20,paciente:"Egnaldo Marins Lacerda",data:"2026-04-22",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador + Cabo/Pinça",custo:2504.33,venda:18000,mes:"Abril"},
+    {id:21,paciente:"Dilcimar Francisca dos Santos",data:"2026-05-01",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador + Hemostático",custo:3424.78,venda:16700,mes:"Maio"},
+    {id:22,paciente:"Cleomar Cardias de Mendonça",data:"2026-05-08",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador",custo:1324.78,venda:13100,mes:"Maio"},
+    {id:23,paciente:"Maria do Carmo Delfino",data:"2026-05-12",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador + Hemostático",custo:2504.33,venda:18000,mes:"Maio"},
+    {id:24,paciente:"Carlos Eduardo Roque da Silva",data:"2026-05-15",medico:"Cristiano Vilela",materiais:"Cabo/Pinça + Splint + Hemostático",custo:1899.55,venda:8200,mes:"Maio"},
+    {id:25,paciente:"Luiz Fernando Santiago da Silva",data:"2026-05-15",medico:"José Lucas Queiroz",materiais:"Kit Neuro + Selador + Cabo/Pinça",custo:1864.33,venda:15500,mes:"Maio"},
+    {id:26,paciente:"Paula M. Pinto",data:"2026-05-15",medico:"José Carlos Mariano",materiais:"Cabo/Pinça + Hastes + Parafusos",custo:7199.49,venda:55100,mes:"Maio"},
+    {id:27,paciente:"Bruna Cardias Azeredo",data:"2026-05-20",medico:"Cristiano Vilela",materiais:"Splint Nasal Estéril",custo:50,venda:300,mes:"Maio"},
+    {id:28,paciente:"José Guimarães",data:"2026-05-22",medico:"José Carlos Mariano",materiais:"Broca Trepan. 14/11",custo:350,venda:2200,mes:"Maio"}
+  ]
+};
+
+var COLUNA_ITENS=[
+  {desc:"MICRO PLACA CRANIOTOMIA Ø18 DRENO 6MM",qtd:1,marca:"TRAUMEC",unit:318.51,total:318.51},
+  {desc:"MICRO PLACA CRANIOTOMIA Ø20MM",qtd:1,marca:"TRAUMEC",unit:318.51,total:318.51},
+  {desc:"MICRO PLACA CRANIOTOMIA Ø25MM",qtd:1,marca:"TRAUMEC",unit:318.51,total:318.51},
+  {desc:"MICRO PLACA X PONTE 5MM",qtd:2,marca:"TRAUMEC",unit:144.78,total:289.56},
+  {desc:"MICRO PLACA X PONTE 7MM",qtd:2,marca:"TRAUMEC",unit:144.78,total:289.56},
+  {desc:"MICRO PLACA X PONTE 9MM",qtd:2,marca:"TRAUMEC",unit:144.78,total:289.56},
+  {desc:"MICRO PLACA QUADRADA 2X2F",qtd:1,marca:"TRAUMEC",unit:144.78,total:144.78},
+  {desc:"MICRO PLACA RETANGULAR 3X2F",qtd:1,marca:"TRAUMEC",unit:173.74,total:173.74},
+  {desc:"MICRO PLACA RETANGULAR 4X2F",qtd:1,marca:"TRAUMEC",unit:173.74,total:173.74},
+  {desc:"MICRO PLACA TREVO",qtd:2,marca:"TRAUMEC",unit:144.78,total:289.56},
+  {desc:"MICRO PLACA Y PONTE 6MM 5F",qtd:2,marca:"TRAUMEC",unit:144.78,total:289.56},
+  {desc:"MICRO PLACA RETA 4F",qtd:4,marca:"TRAUMEC",unit:144.78,total:579.12},
+  {desc:"MICRO PLACA RETA PONTE 12MM 2F",qtd:4,marca:"TRAUMEC",unit:125.90,total:503.60},
+  {desc:"MICRO TELA TR 50,6X74,6MM #0,3MM",qtd:1,marca:"TRAUMEC",unit:629.48,total:629.48},
+  {desc:"MICRO TELA TR 82,6X162,6MM #0,3MM",qtd:1,marca:"TRAUMEC",unit:915.60,total:915.60},
+  {desc:"PARAFUSO CORTICAL NEURO 1,5X3MM TI",qtd:72,marca:"TRAUMEC",unit:26.09,total:1878.48},
+  {desc:"PARAFUSO CORTICAL NEURO 1,5X4MM TI",qtd:100,marca:"TRAUMEC",unit:26.09,total:2609.00},
+  {desc:"PARAFUSO CORTICAL NEURO 1,5X5MM TI",qtd:24,marca:"TRAUMEC",unit:26.09,total:626.16},
+  {desc:"PARAFUSO CORTICAL 1,7X4MM TI",qtd:24,marca:"TRAUMEC",unit:26.09,total:626.16},
+  {desc:"PARAFUSO CORTICAL 1,7X5MM TI (lote 1)",qtd:12,marca:"TRAUMEC",unit:26.09,total:313.08},
+  {desc:"PARAFUSO CORTICAL 1,7X5MM TI (lote 2)",qtd:12,marca:"TRAUMEC",unit:26.09,total:313.08},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.FIXA 5,0X45MM",qtd:1,marca:"OSTEOMED",unit:342.30,total:342.30},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 5,0X35MM",qtd:12,marca:"OSTEOMED",unit:382.09,total:4585.08},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 5,0X40MM",qtd:12,marca:"OSTEOMED",unit:382.09,total:4585.08},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 5,0X45MM",qtd:12,marca:"OSTEOMED",unit:382.09,total:4585.08},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 5,0X50MM",qtd:12,marca:"OSTEOMED",unit:382.09,total:4585.08},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 6,0X40MM",qtd:10,marca:"OSTEOMED",unit:382.09,total:3820.90},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 6,0X45MM",qtd:10,marca:"OSTEOMED",unit:382.09,total:3820.90},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 6,0X50MM",qtd:10,marca:"OSTEOMED",unit:382.09,total:3820.90},
+  {desc:"PARAFUSO PEDICULAR DPZ CAB.MÓVEL 6,0X55MM",qtd:8,marca:"OSTEOMED",unit:382.09,total:3056.72},
+  {desc:"GANCHO DTT PEDICULAR OSTEOMED",qtd:6,marca:"OSTEOMED",unit:194.07,total:1164.42},
+  {desc:"PARAFUSO DTT PEDICULAR (TRAVAMENTO)",qtd:10,marca:"OSTEOMED",unit:156.02,total:1560.20},
+  {desc:"BARRA DTT PEDICULAR 35MM",qtd:1,marca:"OSTEOMED",unit:116.46,total:116.46},
+  {desc:"BARRA DTT PEDICULAR 40MM",qtd:1,marca:"OSTEOMED",unit:116.46,total:116.46},
+  {desc:"BARRA DTT PEDICULAR 45MM",qtd:2,marca:"OSTEOMED",unit:116.46,total:232.92},
+  {desc:"BARRA DTT PEDICULAR 60MM",qtd:1,marca:"OSTEOMED",unit:116.46,total:116.46},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 90MM",qtd:2,marca:"OSTEOMED",unit:116.46,total:232.92},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 100MM",qtd:4,marca:"OSTEOMED",unit:116.46,total:465.84},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 120MM",qtd:4,marca:"OSTEOMED",unit:116.46,total:465.84},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 140MM",qtd:4,marca:"OSTEOMED",unit:116.46,total:465.84},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 160MM",qtd:4,marca:"OSTEOMED",unit:116.46,total:465.84},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 180MM",qtd:4,marca:"OSTEOMED",unit:116.46,total:465.84},
+  {desc:"BARRA DE UNIÃO PEDICULAR DPZ 200MM",qtd:3,marca:"OSTEOMED",unit:116.46,total:349.38},
+  {desc:"DISPOSITIVO DE BLOQUEIO PEDICULAR DPZ",qtd:24,marca:"OSTEOMED",unit:82.79,total:1986.96},
+  {desc:"GANCHO LATERAL 25MM",qtd:1,marca:"OSTEOMED",unit:375.72,total:375.72},
+  {desc:"BLOQUEIO PARA GANCHO LATERAL",qtd:4,marca:"OSTEOMED",unit:13.34,total:53.36}
+];
+
+var NOTAS_FISCAIS=[
+  {forn:"TRAUMEC",nf:"42320",valor:21491.89,data:"2026-02-12"},
+  {forn:"HP BIO",nf:"83607",valor:9358.00,data:"2026-02-11"},
+  {forn:"HP BIO",nf:"83812",valor:5858.00,data:"2026-02-20"},
+  {forn:"HP BIO",nf:"84232",valor:6232.00,data:"2026-03-05"},
+  {forn:"AS2 KANDEL",nf:"28709",valor:3060.00,data:"2026-02-10"},
+  {forn:"BIOMETAL",nf:"43098",valor:7942.00,data:"2026-02-10"},
+  {forn:"VOLMED",nf:"4693",valor:545.98,data:"2026-02-10"},
+  {forn:"MED SHARP",nf:"23561",valor:1200.00,data:"2026-02-11"},
+  {forn:"AS2 KANDEL",nf:"29273",valor:2960.00,data:"2026-03-13"},
+  {forn:"CIMTECH",nf:"14189",valor:3315.40,data:"2026-02-11"},
+  {forn:"MICRODENT",nf:"26723",valor:6686.66,data:"2026-02-10"},
+  {forn:"PLENO MED",nf:"1735",valor:9680.00,data:"2026-03-17"},
+  {forn:"PLENO MED",nf:"1841",valor:2175.00,data:"2026-04-22"},
+  {forn:"TECHNODRY",nf:"13562",valor:4443.90,data:"2026-04-02"},
+  {forn:"ASSUT EUROPE",nf:"10737",valor:8450.00,data:"2026-03-19"},
+  {forn:"AS2 KANDEL",nf:"29830",valor:1810.00,data:"2026-04-15"},
+  {forn:"AS2 KANDEL",nf:"30090",valor:2160.00,data:"2026-04-28"},
+  {forn:"MICRODENT",nf:"27151",valor:2907.99,data:"2026-05-20"},
+  {forn:"MICRODENT",nf:"27072",valor:3628.92,data:"2026-04-28"},
+  {forn:"ASSUT EUROPE",nf:"10885",valor:8450.00,data:"2026-05-25"},
+  {forn:"OSTEOMED",nf:"39281",valor:41836.50,data:"2026-04-15"},
+  {forn:"PLENO MED",nf:"A EMITIR",valor:9680.00,data:null}
+];
+
+var ESTOQUE=[
+  {desc:"BROCA CORTANTE 4,00X120.0",saldo:5,custo:160,venda:1900,repor:0},
+  {desc:"BROCA CORTANTE 5,00X120.0",saldo:4,custo:160,venda:1900,repor:0},
+  {desc:"BROCA TREPANAÇÃO HUDSON 11/7",saldo:5,custo:350,venda:2200,repor:3},
+  {desc:"BROCA TREPANAÇÃO HUDSON 14/11",saldo:7,custo:350,venda:2200,repor:6},
+  {desc:"BROCA DIAMANTADA 4,00X120,0",saldo:4,custo:260,venda:1900,repor:0},
+  {desc:"BROCA DIAMANTADA 5,00X120,0",saldo:5,custo:260,venda:1900,repor:0},
+  {desc:"CIMENTO CRAN-MAXX",saldo:2,custo:989,venda:4700,repor:3},
+  {desc:"CIMENTO VERT-MAXX",saldo:1,custo:549,venda:3800,repor:4},
+  {desc:"COMPRESSAS NEURO 13X13",saldo:5,custo:24,venda:400,repor:13},
+  {desc:"COMPRESSAS NEURO 13X38MM",saldo:5,custo:24,venda:400,repor:13},
+  {desc:"COMPRESSAS NEURO 13X51MM",saldo:5,custo:24,venda:400,repor:13},
+  {desc:"COMPRESSAS NEURO 19X19MM",saldo:5,custo:24,venda:400,repor:13},
+  {desc:"COMPRESSAS NEURO 25X25MM",saldo:9,custo:24,venda:400,repor:9},
+  {desc:"COMPRESSAS NEURO 25X76MM",saldo:8,custo:24,venda:400,repor:10},
+  {desc:"COMPRESSAS NEURO 38X38MM",saldo:8,custo:24,venda:400,repor:10},
+  {desc:"COMPRESSAS NEURO 76X76MM",saldo:5,custo:24,venda:400,repor:19},
+  {desc:"DRENAGEM VENTRICULAR EXTERNA",saldo:9,custo:338,venda:1900,repor:10},
+  {desc:"FRESA CRANIOTOMO 1,60X20,0",saldo:7,custo:330,venda:2900,repor:10},
+  {desc:"KIT CANULA NEURO (FACIAL)",saldo:11,custo:250,venda:8000,repor:4},
+  {desc:"KIT CANULA NEURO (LARINGEO)",saldo:19,custo:350,venda:8000,repor:36},
+  {desc:"LAMINA MARCLAMP CUT IQ",saldo:10,custo:1195,venda:5100,repor:30},
+  {desc:"PINÇA BIPOLAR 22C X 2,5",saldo:5,custo:539.55,venda:2400,repor:22},
+  {desc:"DERIVAÇÃO HIDROCEFALIA DUO A",saldo:1,custo:528,venda:3100,repor:4},
+  {desc:"DERIVAÇÃO HIDROCEFALIA DUO B",saldo:2,custo:528,venda:3100,repor:3},
+  {desc:"DERIVAÇÃO HIDROCEFALIA INFANTIL A",saldo:1,custo:528,venda:3100,repor:2},
+  {desc:"DERIVAÇÃO HIDROCEFALIA INFANTIL B",saldo:2,custo:528,venda:3100,repor:1},
+  {desc:"DERIVAÇÃO HIDROCEFALIA NEONATAL",saldo:3,custo:528,venda:3100,repor:1},
+  {desc:"SPLINT NASAL INTERNO",saldo:4,custo:50,venda:300,repor:10},
+  {desc:"TUNELIZADOR PERITONEAL 35CM",saldo:2,custo:186,venda:2100,repor:1},
+  {desc:"TUNELIZADOR PERITONEAL 65CM",saldo:2,custo:204,venda:2100,repor:1},
+  {desc:"TUNELIZADOR PERITONEAL 50CM",saldo:2,custo:223,venda:2100,repor:1},
+  {desc:"CATETER PRESSÃO INTRACRANIANA",saldo:2,custo:2929,venda:8500,repor:8},
+  {desc:"CATETER DRENAGEM VENTRICULAR",saldo:1,custo:3116,venda:8500,repor:3},
+  {desc:"PÓ HEMOSTÁTICO (EQUICEL)",saldo:7,custo:640,venda:2500,repor:0},
+  {desc:"HEMOSTÁTICO EM GEL (OXITAMP)",saldo:7,custo:1050,venda:3600,repor:20},
+  {desc:"VERT-SYS LEAN - CONJ. VERT.",saldo:1,custo:599,venda:6800,repor:4},
+  {desc:"DURA DRY FILME 7,5X7,5CM",saldo:2,custo:2200,venda:7100,repor:3}
+];
+
+var DOC_CATS={
+  "Societário":["Contrato Social","Alteração Contratual","Ata de Reunião","Procuração"],
+  "Sanitário & ANVISA":["AFE","Licença Sanitária","Certificado BPF","Notificação ANVISA"],
+  "Fiscal & Tributário":["CNPJ","Inscrição Municipal","Simples Nacional","CND"],
+  "Trabalhista":["Contrato de Trabalho","Registro de Funcionário","Folha de Pagamento"],
+  "Técnico Farmacêutico":["Responsabilidade Técnica","Diploma","Registro CRF","Laudos"],
+  "Contratos Operacionais":["Contrato Hospitalar","Contrato Fornecedor","Locação"],
+  "Contrato de Clientes":["Prestação de Serviços","Aditivo","Proposta Comercial"]
+};
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function fmt(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function pct(v){return(v*100).toFixed(1)+'%';}
+function todasLinhas(){var r=[];Object.values(state.categorias).forEach(function(a){a.forEach(function(l){r.push(l);});});return r;}
+function totalCusto(mes){return todasLinhas().reduce(function(a,l){return a+(state.custos[l]&&state.custos[l][mes]?state.custos[l][mes]:0);},0);}
+function lucro(mes){return(state.receitas[mes]||0)-totalCusto(mes);}
+function totalGeral(){
+  var ma=MESES.filter(function(m){return(state.receitas[m]||0)>0;});
+  var rec=ma.reduce(function(a,m){return a+(state.receitas[m]||0);},0);
+  var cus=ma.reduce(function(a,m){return a+totalCusto(m);},0);
+  return{receita:rec,custo:cus,lucro:rec-cus};
+}
+function calcSimples(){
+  MESES.forEach(function(m){
+    if(!state.custos[SIMPLES_KEY])state.custos[SIMPLES_KEY]={};
+    state.custos[SIMPLES_KEY][m]=(state.receitas[m]||0)*0.15;
+  });
+}
+function diasVencer(v){if(!v)return null;return Math.ceil((new Date(v)-new Date(today))/86400000);}
+function statusDoc(v){
+  if(!v)return{label:'Permanente',color:'#64748b'};
+  var d=diasVencer(v);
+  if(d<0)return{label:'Vencido',color:'#ef4444'};
+  if(d<=60)return{label:'Vence em '+d+'d',color:'#f59e0b'};
+  return{label:'Vigente',color:'#10b981'};
+}
+function showToast(msg){var t=document.getElementById('toast');t.textContent='✓ '+msg;t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
+function drawBar(elId,data,color){
+  var el=document.getElementById(elId);if(!el)return;
+  var max=Math.max.apply(null,data.map(function(d){return d.v;}));if(max<=0)max=1;
+  el.innerHTML=data.map(function(d){
+    var h=Math.max(Math.round((d.v/max)*80),2);
+    return '<div class="bar-wrap"><div class="bar-val">'+fmt(d.v).replace('R$\u00a0','R$')+'</div><div class="bar-body"><div class="bar-fill" style="height:'+h+'px;background:'+color+'"></div></div><div class="bar-lbl">'+d.l+'</div></div>';
+  }).join('');
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function renderDashboard(){
+  var tg=totalGeral();
+  var totalCir=state.cirurgias.length;
+  document.getElementById('kpisGrid').innerHTML=
+    '<div class="card"><div class="kpi-label">Receita Acumulada</div><div class="kpi-val" style="color:#3b82f6">'+fmt(tg.receita)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Lucro Acumulado</div><div class="kpi-val" style="color:#10b981">'+fmt(tg.lucro)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Custo Total</div><div class="kpi-val" style="color:#f59e0b">'+fmt(tg.custo)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Cirurgias</div><div class="kpi-val" style="color:#a78bfa">'+totalCir+'</div></div>';
+
+  var ma=MESES.filter(function(m){return(state.receitas[m]||0)>0;});
+  drawBar('chartRec',ma.map(function(m){return{l:m.slice(0,3),v:state.receitas[m]||0};}), '#3b82f6');
+  drawBar('chartLuc',ma.map(function(m){return{l:m.slice(0,3),v:Math.max(lucro(m),0)};}), '#10b981');
+
+  var rows=ma.map(function(m){
+    var rec=state.receitas[m]||0,cus=totalCusto(m),luc=rec-cus;
+    var cir=state.cirurgias.filter(function(c){return c.mes===m;}).length;
+    var cor=luc>=0?'#10b981':'#ef4444';
+    return '<tr><td class="L" style="font-weight:600">'+m+'</td><td style="color:#a78bfa">'+cir+'</td><td style="color:#3b82f6">'+fmt(rec)+'</td><td style="color:#f59e0b">'+fmt(cus)+'</td><td style="color:'+cor+'">'+fmt(luc)+'</td><td style="color:'+cor+'">'+pct(luc/rec)+'</td></tr>';
+  }).join('');
+  rows+='<tr class="tot-row"><td class="L">TOTAL</td><td style="color:#a78bfa">'+totalCir+'</td><td style="color:#3b82f6">'+fmt(tg.receita)+'</td><td style="color:#f59e0b">'+fmt(tg.custo)+'</td><td style="color:#10b981">'+fmt(tg.lucro)+'</td><td style="color:#10b981">'+pct(tg.lucro/tg.receita)+'</td></tr>';
+  document.getElementById('tblMensal').innerHTML=rows;
+
+  var alertas=state.docs.filter(function(d){var dd=diasVencer(d.validade);return dd!==null&&dd<=60;});
+  var badge=document.getElementById('alertaBadge');
+  var div=document.getElementById('alertaVenc');
+  if(alertas.length>0){
+    badge.style.display='block';badge.textContent='⚠ '+alertas.length+' doc'+(alertas.length>1?'s':'')+' a vencer';
+    div.innerHTML='<div class="alerta"><div class="alerta-title">⚠ Documentos com Vencimento Próximo</div>'+alertas.map(function(d){var s=statusDoc(d.validade);return'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2535"><span>'+d.nome+'</span><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:'+s.color+'22;color:'+s.color+'">'+s.label+'</span></div>';}).join('')+'</div>';
+  }else{badge.style.display='none';div.innerHTML='';}
+}
+
+function renderMesTabs(){
+  document.getElementById('mesTabs').innerHTML=MESES.map(function(m){
+    return'<button class="btn '+(m===state.mesSel?'btn-blue':'btn-gray')+'" data-mes="'+m+'">'+m+'</button>';
+  }).join('');
+  document.getElementById('mesTabs').querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click',function(){state.mesSel=this.dataset.mes;renderMesTabs();renderFinanceiro();});
+  });
+}
+
+function renderFinanceiro(){
+  document.getElementById('inpRec').value=state.receitas[state.mesSel]||0;
+  document.getElementById('inpCir').value=state.cirurgias.filter(function(c){return c.mes===state.mesSel;}).length;
+  var html='';
+  Object.keys(state.categorias).forEach(function(grupo){
+    var linhas=state.categorias[grupo];
+    html+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="sec-hdr">'+grupo+'</div>';
+    linhas.forEach(function(l){
+      var val=state.custos[l]&&state.custos[l][state.mesSel]?state.custos[l][state.mesSel]:0;
+      var isAuto=l===SIMPLES_KEY;
+      html+='<div style="display:flex;align-items:center;padding:9px 20px;border-bottom:1px solid #1a2032;gap:10px"><span style="flex:1;font-size:13px;color:#cbd5e1">'+l+'</span>';
+      if(isAuto){html+='<span style="width:160px;text-align:right;font-size:13px;color:#f59e0b;padding:6px 10px;background:#111520;border-radius:6px;border:1px solid #2d3748">'+fmt(val)+' <span style="font-size:10px;color:#64748b">auto</span></span>';}
+      else{html+='<input type="number" value="'+val+'" data-linha="'+l+'" class="custo-input" style="width:160px;margin:0;text-align:right;background:#0f1117;border:1px dashed #2d3748;border-radius:7px;padding:6px 10px;color:#e2e8f0;font-size:13px">';}
+      html+='<button class="remove-btn" data-grupo="'+grupo+'" data-linha="'+l+'">✕</button></div>';
+    });
+    var sub=linhas.reduce(function(a,l){return a+(state.custos[l]&&state.custos[l][state.mesSel]?state.custos[l][state.mesSel]:0);},0);
+    html+='<div style="padding:8px 20px;background:#111520;display:flex;justify-content:flex-end;font-size:12px;color:#64748b">Subtotal: <span style="color:#f59e0b;font-weight:700;margin-left:8px">'+fmt(sub)+'</span></div></div>';
+  });
+  document.getElementById('custosGrupos').innerHTML=html;
+  document.querySelectorAll('.custo-input').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var l=this.dataset.linha;
+      if(!state.custos[l])state.custos[l]={};
+      state.custos[l][state.mesSel]=parseFloat(this.value)||0;
+      renderFinanceiro();renderDashboard();renderDRE();
+    });
+  });
+  document.querySelectorAll('#custosGrupos .remove-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var g=this.dataset.grupo,l=this.dataset.linha;
+      state.categorias[g]=state.categorias[g].filter(function(x){return x!==l;});
+      delete state.custos[l];
+      renderFinanceiro();renderDRE();renderConfig();showToast('Linha removida.');
+    });
+  });
+  var cus=totalCusto(state.mesSel),luc=lucro(state.mesSel),cor=luc>=0?'#10b981':'#ef4444';
+  document.getElementById('resultMes').innerHTML='<span style="font-size:14px;font-weight:700;color:#94a3b8">RESULTADO '+state.mesSel.toUpperCase()+'</span><div style="display:flex;gap:32px"><div style="text-align:right"><div style="font-size:11px;color:#64748b">Custo Total</div><div style="font-size:20px;font-weight:800;color:#f59e0b">'+fmt(cus)+'</div></div><div style="text-align:right"><div style="font-size:11px;color:#64748b">Lucro</div><div style="font-size:20px;font-weight:800;color:'+cor+'">'+fmt(luc)+'</div></div></div>';
+}
+
+function renderCirurgias(){
+  document.getElementById('tblCir').innerHTML=state.cirurgias.map(function(c,i){
+    var m=c.venda>0?((c.venda-c.custo)/c.venda*100):0;
+    return'<tr style="background:'+(i%2===0?'#141824':'#111520')+'"><td class="L">'+c.paciente+'</td><td style="color:#64748b;font-size:11px">'+c.data+'</td><td class="L" style="color:#94a3b8">'+c.medico+'</td><td class="L" style="font-size:11px;color:#cbd5e1">'+c.materiais+'</td><td style="color:#f59e0b">'+fmt(c.custo)+'</td><td style="color:#3b82f6">'+fmt(c.venda)+'</td><td style="color:'+(m>=50?'#10b981':'#f59e0b')+'">'+m.toFixed(0)+'%</td><td style="color:#a78bfa;font-size:11px">'+c.mes+'</td><td><button class="remove-btn" data-id="'+c.id+'">✕</button></td></tr>';
+  }).join('');
+  document.querySelectorAll('#tblCir .remove-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(this.dataset.id);
+      state.cirurgias=state.cirurgias.filter(function(c){return c.id!==id;});
+      renderCirurgias();renderDashboard();showToast('Cirurgia removida.');
+    });
+  });
+}
+
+function renderDocumentos(){
+  var cats=['Todas'].concat(Object.keys(DOC_CATS));
+  document.getElementById('docFiltros').innerHTML=cats.map(function(c){return'<button class="btn '+(c===state.docFiltro?'btn-blue':'btn-gray')+' doc-filtro-btn" style="padding:6px 12px;font-size:11px" data-cat="'+c+'">'+c+'</button>';}).join('');
+  document.querySelectorAll('.doc-filtro-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){state.docFiltro=this.dataset.cat;renderDocumentos();});
+  });
+  var html='';
+  Object.keys(DOC_CATS).forEach(function(cat){
+    if(state.docFiltro!=='Todas'&&state.docFiltro!==cat)return;
+    var catDocs=state.docs.filter(function(d){return d.categoria===cat;});
+    if(!catDocs.length&&state.docFiltro==='Todas')return;
+    html+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="sec-hdr" style="display:flex;justify-content:space-between"><span>📁 '+cat+'</span><span style="font-weight:400">'+catDocs.length+' doc'+(catDocs.length!==1?'s':'')+'</span></div>';
+    if(!catDocs.length){html+='<div style="padding:16px 20px;font-size:12px;color:#374151;font-style:italic">Nenhum documento cadastrado.</div>';}
+    else{
+      html+='<table><thead><tr><th class="L">Documento</th><th>Tipo</th><th>Upload</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody>';
+      catDocs.forEach(function(d){var s=statusDoc(d.validade);html+='<tr><td class="L"><div style="font-weight:500">'+d.nome+'</div><div style="font-size:10px;color:#64748b">'+d.subcategoria+'</div></td><td style="color:#64748b">'+d.tipo+'</td><td style="color:#64748b;font-size:11px">'+d.dataUpload+'</td><td style="color:#64748b;font-size:11px">'+(d.validade||'—')+'</td><td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:'+s.color+'22;color:'+s.color+'">'+s.label+'</span></td><td><button class="remove-btn" data-id="'+d.id+'">✕</button></td></tr>';});
+      html+='</tbody></table>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('docLista').innerHTML=html;
+  document.querySelectorAll('#docLista .remove-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(this.dataset.id);
+      state.docs=state.docs.filter(function(d){return d.id!==id;});
+      renderDocumentos();renderDashboard();showToast('Documento removido.');
+    });
+  });
+}
+
+function renderDRE(){
+  var ma=MESES.filter(function(m){return(state.receitas[m]||0)>0;});
+  document.getElementById('dreHdr').innerHTML='<th class="L">Componente</th>'+ma.map(function(m){return'<th>'+m.slice(0,3).toUpperCase()+'</th>';}).join('')+'<th>TOTAL</th>';
+  var rows='';
+  var recTot=ma.reduce(function(a,m){return a+(state.receitas[m]||0);},0);
+  rows+='<tr style="background:#1a2535"><td class="L" style="color:#3b82f6;font-weight:700">RECEITA BRUTA</td>'+ma.map(function(m){return'<td style="color:#3b82f6;font-weight:600">'+fmt(state.receitas[m]||0)+'</td>';}).join('')+'<td style="color:#3b82f6;font-weight:700">'+fmt(recTot)+'</td></tr>';
+  Object.keys(state.categorias).forEach(function(grupo){
+    var linhas=state.categorias[grupo];
+    rows+='<tr style="background:#1e2535"><td class="L" style="color:#94a3b8;font-weight:700;font-size:11px;text-transform:uppercase">'+grupo+'</td>'+ma.map(function(){return'<td></td>';}).join('')+'<td></td></tr>';
+    linhas.forEach(function(l,li){
+      var tot=ma.reduce(function(a,m){return a+(state.custos[l]&&state.custos[l][m]?state.custos[l][m]:0);},0);
+      rows+='<tr style="background:'+(li%2===0?'#141824':'#111520')+'"><td class="L" style="padding-left:32px;color:#cbd5e1">'+l+'</td>'+ma.map(function(m){return'<td style="color:#f59e0b">'+fmt(state.custos[l]&&state.custos[l][m]?state.custos[l][m]:0)+'</td>';}).join('')+'<td style="color:#f59e0b;font-weight:600">'+fmt(tot)+'</td></tr>';
+    });
+    var subTot=ma.reduce(function(a,m){return a+linhas.reduce(function(b,l){return b+(state.custos[l]&&state.custos[l][m]?state.custos[l][m]:0);},0);},0);
+    rows+='<tr class="sub-row"><td class="L">Subtotal '+grupo+'</td>'+ma.map(function(m){return'<td>'+fmt(linhas.reduce(function(a,l){return a+(state.custos[l]&&state.custos[l][m]?state.custos[l][m]:0);},0))+'</td>';}).join('')+'<td>'+fmt(subTot)+'</td></tr>';
+  });
+  var cusTot=ma.reduce(function(a,m){return a+totalCusto(m);},0);
+  var lucTot=ma.reduce(function(a,m){return a+lucro(m);},0);
+  rows+='<tr class="tot-row"><td class="L">CUSTO TOTAL</td>'+ma.map(function(m){return'<td style="color:#f59e0b">'+fmt(totalCusto(m))+'</td>';}).join('')+'<td style="color:#f59e0b">'+fmt(cusTot)+'</td></tr>';
+  rows+='<tr class="luc-row"><td class="L">LUCRO LÍQUIDO</td>'+ma.map(function(m){var l=lucro(m);return'<td style="color:'+(l>=0?'#10b981':'#ef4444')+'">'+fmt(l)+'</td>';}).join('')+'<td>'+fmt(lucTot)+'</td></tr>';
+  rows+='<tr class="mrg-row"><td class="L">Margem %</td>'+ma.map(function(m){var r=state.receitas[m]||1,l=lucro(m);return'<td style="color:'+(l>=0?'#10b981':'#ef4444')+'">'+pct(l/r)+'</td>';}).join('')+'<td>'+pct(lucTot/recTot)+'</td></tr>';
+  document.getElementById('dreBody').innerHTML=rows;
+}
+
+function renderEstoque(){
+  var lista=state.estFiltro==='repor'?ESTOQUE.filter(function(i){return i.repor>0;}):ESTOQUE;
+  var totalC=ESTOQUE.reduce(function(a,i){return a+i.saldo*i.custo;},0);
+  var totalV=ESTOQUE.reduce(function(a,i){return a+i.saldo*i.venda;},0);
+  var itRepor=ESTOQUE.filter(function(i){return i.repor>0;}).length;
+  var mg=((totalV-totalC)/totalC*100).toFixed(1);
+  document.getElementById('estKpis').innerHTML=
+    '<div class="card"><div class="kpi-label">Total Investido</div><div class="kpi-val" style="color:#f59e0b">'+fmt(totalC)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Potencial de Venda</div><div class="kpi-val" style="color:#3b82f6">'+fmt(totalV)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Margem Potencial</div><div class="kpi-val" style="color:#10b981">'+mg+'%</div></div>'+
+    '<div class="card"><div class="kpi-label">Itens para Repor</div><div class="kpi-val" style="color:#ef4444">'+itRepor+'</div></div>';
+  var top=ESTOQUE.filter(function(i){return i.repor>0;}).sort(function(a,b){return b.repor-a.repor;}).slice(0,3);
+  document.getElementById('estAlerta').innerHTML=top.length?'<div class="alerta"><div class="alerta-title">⚠ Maior Necessidade de Reposição</div>'+top.map(function(i){return'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2535"><span style="font-size:13px;color:#cbd5e1">'+i.desc+'</span><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#ef444422;color:#ef4444">Repor '+i.repor+' unid.</span></div>';}).join('')+'</div>':'';
+  document.getElementById('tblEst').innerHTML=lista.map(function(i,idx){
+    var tc=i.saldo*i.custo,tv=i.saldo*i.venda,mg=((i.venda-i.custo)/i.custo*100).toFixed(0);
+    return'<tr style="background:'+(idx%2===0?'#141824':'#111520')+'"><td class="L" style="font-size:12px">'+i.desc+'</td><td style="color:'+(i.saldo<=2?'#ef4444':'#a78bfa')+';font-weight:600">'+i.saldo+'</td><td style="color:#64748b">'+fmt(i.custo)+'</td><td style="color:#f59e0b">'+fmt(tc)+'</td><td style="color:#64748b">'+fmt(i.venda)+'</td><td style="color:#3b82f6">'+fmt(tv)+'</td><td style="color:#10b981">'+mg+'%</td><td>'+(i.repor>0?'<span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#ef444422;color:#ef4444">'+i.repor+' unid.</span>':'<span style="color:#374151;font-size:11px">OK</span>')+'</td></tr>';
+  }).join('');
+}
+
+function renderColuna(){
+  var totalMat=COLUNA_ITENS.reduce(function(a,i){return a+i.total;},0);
+  var totalNF=NOTAS_FISCAIS.reduce(function(a,n){return a+n.valor;},0);
+  var totalGeral=totalMat+totalNF;
+  document.getElementById('colKpis').innerHTML=
+    '<div class="card"><div class="kpi-label">Materiais Adquiridos</div><div class="kpi-val" style="color:#f59e0b">'+fmt(totalMat)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Notas Fiscais Pagas</div><div class="kpi-val" style="color:#3b82f6">'+fmt(totalNF)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Total Investido</div><div class="kpi-val" style="color:#10b981">'+fmt(totalGeral)+'</div></div>'+
+    '<div class="card"><div class="kpi-label">Fornecedores</div><div class="kpi-val" style="color:#a78bfa">'+(new Set(NOTAS_FISCAIS.map(function(n){return n.forn;}))).size+'</div></div>';
+
+  document.getElementById('tblColuna').innerHTML=COLUNA_ITENS.map(function(i,idx){
+    return'<tr style="background:'+(idx%2===0?'#141824':'#111520')+'"><td class="L" style="font-size:12px">'+i.desc+'</td><td style="color:#a78bfa">'+i.qtd+'</td><td class="L" style="color:#64748b;font-size:11px">'+i.marca+'</td><td style="color:#64748b">'+fmt(i.unit)+'</td><td style="color:#f59e0b">'+fmt(i.total)+'</td></tr>';
+  }).join('')+'<tr class="tot-row"><td class="L">TOTAL</td><td></td><td></td><td></td><td style="color:#f59e0b">'+fmt(totalMat)+'</td></tr>';
+
+  document.getElementById('tblNFs').innerHTML=NOTAS_FISCAIS.map(function(n,idx){
+    var dataFmt=n.data?n.data.split('-').reverse().join('/'):'A emitir';
+    return'<tr style="background:'+(idx%2===0?'#141824':'#111520')+'"><td class="L">'+n.forn+'</td><td class="L" style="color:#64748b">'+n.nf+'</td><td style="color:#64748b;font-size:11px">'+dataFmt+'</td><td style="color:#3b82f6">'+fmt(n.valor)+'</td></tr>';
+  }).join('')+'<tr class="tot-row"><td class="L">TOTAL</td><td></td><td></td><td style="color:#3b82f6">'+fmt(totalNF)+'</td></tr>';
+}
+
+
+  var sel=document.getElementById('cfgGrupo');
+  sel.innerHTML=Object.keys(state.categorias).map(function(g){return'<option>'+g+'</option>';}).join('');
+  var html='';
+  Object.keys(state.categorias).forEach(function(grupo){
+    var linhas=state.categorias[grupo];
+    html+='<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">'+grupo+'</div>';
+    if(!linhas.length)html+='<div style="font-size:12px;color:#374151;padding:8px 0">Nenhuma linha.</div>';
+    linhas.forEach(function(l){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f1117;border-radius:6px;margin-bottom:4px"><span style="font-size:13px;color:#cbd5e1">'+l+'</span><button class="btn btn-red cfg-remove" style="padding:3px 10px;font-size:12px" data-grupo="'+grupo+'" data-linha="'+l+'">Remover</button></div>';});
+    html+='</div>';
+  });
+  document.getElementById('cfgEstrutura').innerHTML=html;
+  document.querySelectorAll('.cfg-remove').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var g=this.dataset.grupo,l=this.dataset.linha;
+      state.categorias[g]=state.categorias[g].filter(function(x){return x!==l;});
+      delete state.custos[l];
+      renderConfig();renderFinanceiro();renderDRE();showToast('Linha removida.');
+    });
+  });
+}
+
+function updateDocCats(){
+  var sel=document.getElementById('d_cat');
+  sel.innerHTML=Object.keys(DOC_CATS).map(function(c){return'<option>'+c+'</option>';}).join('');
+  updateSubcats();
+}
+function updateSubcats(){
+  var cat=document.getElementById('d_cat').value;
+  document.getElementById('d_sub').innerHTML=(DOC_CATS[cat]||[]).map(function(s){return'<option>'+s+'</option>';}).join('');
+}
+
+function initApp(){
+  calcSimples();
+  // Nav
+  document.querySelectorAll('.nav-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+      this.classList.add('active');
+      var pg=document.getElementById('page-'+this.dataset.page);
+      if(pg)pg.classList.add('active');
+      var p=this.dataset.page;
+      if(p==='dashboard')renderDashboard();
+      else if(p==='financeiro'){renderMesTabs();renderFinanceiro();}
+      else if(p==='operacional')renderCirurgias();
+      else if(p==='documentos')renderDocumentos();
+      else if(p==='dre')renderDRE();
+      else if(p==='investimento'){}
+      else if(p==='estoque'){renderEstoque();renderColuna();}
+      else if(p==='config')renderConfig();
+    });
+  });
+  // Receita input
+  document.getElementById('inpRec').addEventListener('change',function(){
+    state.receitas[state.mesSel]=parseFloat(this.value)||0;
+    calcSimples();renderFinanceiro();renderDashboard();renderDRE();
+  });
+  // Cirurgia form
+  MESES.forEach(function(m){var opt=document.createElement('option');opt.value=m;opt.textContent=m;if(m==='Maio')opt.selected=true;document.getElementById('c_mes').appendChild(opt);});
+  document.getElementById('btnNovaCir').addEventListener('click',function(){document.getElementById('formCir').classList.toggle('open');});
+  document.getElementById('btnCancelCir').addEventListener('click',function(){document.getElementById('formCir').classList.remove('open');});
+  document.getElementById('btnSalvaCir').addEventListener('click',function(){
+    var nova={id:Date.now(),paciente:document.getElementById('c_pac').value,data:document.getElementById('c_data').value,medico:document.getElementById('c_med').value,materiais:document.getElementById('c_mat').value,custo:parseFloat(document.getElementById('c_cus').value)||0,venda:parseFloat(document.getElementById('c_ven').value)||0,mes:document.getElementById('c_mes').value};
+    state.cirurgias.push(nova);
+    state.receitas[nova.mes]=(state.receitas[nova.mes]||0)+nova.venda;
+    if(!state.custos['Materiais Cirúrgicos'])state.custos['Materiais Cirúrgicos']={};
+    state.custos['Materiais Cirúrgicos'][nova.mes]=(state.custos['Materiais Cirúrgicos'][nova.mes]||0)+nova.custo;
+    calcSimples();renderCirurgias();renderDashboard();renderFinanceiro();renderDRE();
+    document.getElementById('formCir').classList.remove('open');
+    showToast('Cirurgia registrada!');
+  });
+  // Doc form
+  updateDocCats();
+  document.getElementById('d_cat').addEventListener('change',updateSubcats);
+  document.getElementById('uploadArea').addEventListener('click',function(){document.getElementById('d_arq').click();});
+  document.getElementById('d_arq').addEventListener('change',function(){if(this.files[0])document.getElementById('uploadArea').textContent='✓ '+this.files[0].name;});
+  document.getElementById('btnNovoDoc').addEventListener('click',function(){document.getElementById('formDoc').classList.toggle('open');});
+  document.getElementById('btnCancelDoc').addEventListener('click',function(){document.getElementById('formDoc').classList.remove('open');});
+  document.getElementById('btnSalvaDoc').addEventListener('click',function(){
+    var arq=document.getElementById('d_arq').files[0];
+    var nome=document.getElementById('d_nome').value;
+    var sub=document.getElementById('d_sub').value;
+    if(!nome||!sub||!arq){showToast('Preencha todos os campos.');return;}
+    state.docs.push({id:Date.now(),nome:nome,categoria:document.getElementById('d_cat').value,subcategoria:sub,dataUpload:today,validade:document.getElementById('d_val').value||null,tipo:arq.name.split('.').pop().toUpperCase()});
+    document.getElementById('d_nome').value='';document.getElementById('d_val').value='';document.getElementById('d_arq').value='';document.getElementById('uploadArea').textContent='Clique para selecionar arquivo';
+    document.getElementById('formDoc').classList.remove('open');
+    renderDocumentos();renderDashboard();showToast('Documento cadastrado!');
+  });
+  // Estoque filtros
+  document.getElementById('btnEstTodos').addEventListener('click',function(){state.estFiltro='todos';renderEstoque();});
+  document.getElementById('btnEstRepor').addEventListener('click',function(){state.estFiltro='repor';renderEstoque();});
+  document.getElementById('btnEstNeuro').addEventListener('click',function(){
+    document.getElementById('estoqueNeuro').style.display='block';
+    document.getElementById('estoqueColuna').style.display='none';
+    this.className='btn btn-blue';
+    document.getElementById('btnEstColuna').className='btn btn-gray';
+  });
+  document.getElementById('btnEstColuna').addEventListener('click',function(){
+    document.getElementById('estoqueNeuro').style.display='none';
+    document.getElementById('estoqueColuna').style.display='block';
+    this.className='btn btn-blue';
+    document.getElementById('btnEstNeuro').className='btn btn-gray';
+  });
+  // Config
+  document.getElementById('btnAddLinha').addEventListener('click',function(){
+    var g=document.getElementById('cfgGrupo').value;
+    var l=document.getElementById('cfgLinha').value.trim();
+    if(!l)return;
+    state.categorias[g].push(l);
+    if(!state.custos[l])state.custos[l]=Object.fromEntries?Object.fromEntries(MESES.map(function(m){return[m,0];})):(function(){var o={};MESES.forEach(function(m){o[m]=0;});return o;})();
+    document.getElementById('cfgLinha').value='';
+    renderConfig();renderFinanceiro();renderDRE();showToast('Linha adicionada!');
+  });
+  document.getElementById('btnAddGrupo').addEventListener('click',function(){
+    var n=document.getElementById('cfgGrupoNome').value.trim();
+    if(!n)return;
+    state.categorias[n]=[];
+    document.getElementById('cfgGrupoNome').value='';
+    renderConfig();showToast('Grupo criado!');
+  });
+  // Sair
+  document.getElementById('outBtn').addEventListener('click',function(){
+    document.getElementById('app').style.display='none';
+    document.getElementById('loginPage').style.display='flex';
+  });
+  // Render inicial
+  renderDashboard();
+  renderMesTabs();
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────
+document.getElementById('loginBtn').addEventListener('click',function(){
+  var e=document.getElementById('lemail').value.trim();
+  var p=document.getElementById('lpass').value;
+  if(e==='admin@clanmed.com.br'&&p==='admin123'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  }else{
+    document.getElementById('lerr').style.display='block';
+  }
+});
+document.getElementById('lpass').addEventListener('keydown',function(e){
+  if(e.key==='Enter')document.getElementById('loginBtn').click();
+});
+</script>
+</body>
+</html>
